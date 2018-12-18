@@ -25,6 +25,10 @@ import pandas
 # num_feature = 3
 
 def PCA(features, k):
+    """ features: all the training data [m * n] 
+        (m is the number of examples, n is the number of features)
+        k: the new number of features
+    """
     # read feature
     num_example = features.shape[0]
     num_feature = features.shape[1]
