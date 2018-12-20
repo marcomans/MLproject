@@ -66,3 +66,11 @@ print("----------\nActual value:\n----------\n{}\n----------\n".format(targetTes
 err = np.sqrt(np.mean((y_preds-targetTest)**2))
 
 print("----------\nresidual standard error : {}\n----------\n".format(err))
+
+X2=pd.read_csv("data/X2.csv")
+dataset = X2.values
+X_test_transf = poly.fit_transform(dataset)
+y_preds = lin_regressor.predict(X_test_transf)
+print("----------\nY2 values predicted for X2:\n----------\n")
+for i in y_preds:
+        print(i)
