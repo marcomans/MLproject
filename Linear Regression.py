@@ -12,7 +12,7 @@ import math
 
 
 # parameters
-PCA_k = 8
+PCA_k = 6
 
 def Criterion(W, x, targets):
     num_example = x.shape[0]
@@ -46,6 +46,22 @@ def Training(Weight, x, targets, alpha, num_epoch):
     return Weight
 
 
+def Evaluating(W, x, targets):
+    num_example = x.shape[0]
+    x_axis = [i + 1 for i in range(num_example)]
+    prediction_list = [np.dot(x[index, :], W1) for index in range(num_example)]
+    # plt.scatter(x_axis, prediction_list)
+    plt.plot(x_axis, prediction_list,'.b')
+    plt.plot(x_axis, targets,'.r')
+    for i in range(num_example):
+        x = [i+1, i+1]
+        plt.plot(x, [prediction_list[i], targets[i]], color='k')
+    plt.xlabel('Sample')
+    plt.ylabel('Output')
+    plt.show()
+
+
+
 # read dataset
 pwd = os.getcwd()
 path = os.path.join(pwd, 'Dataset')
@@ -60,11 +76,11 @@ dataset = dataset.values
 all_features = dataset[:, : -1]
 
 # PCA
-# reduced_all_features = PCA_ed(all_features, PCA_k)
-reduced_all_features = all_features
+reduced_all_features, new_features = PCA_ed(all_features, PCA_k)
+# reduced_all_features = all_features
 # print(all_features[0,:])
 # print(reduced_all_features[0,:])
-
+np.save("linear_vector.npy", new_features)
 # bias
 bias = np.ones((num_example, 1))
 biased_reduced_all_features = np.hstack((bias, reduced_all_features))
@@ -75,46 +91,39 @@ all_targets = dataset[:, -1]
 all_targets = all_targets.reshape((num_example, 1))
 # print(all_targets.shape)
 
-# parameter
-# split_parts = 4
-# # split features
-# length = int(num_example / split_parts)
-# feature_parts = [biased_reduced_all_features[part * length : (part + 1) * length, :] for part in range(split_parts)]
-# stacked_features = np.vstack((feature_parts[0], feature_parts[1], feature_parts[2], feature_parts[3]))
-# # print(stacked_features.shape)
-
-# # split targets
-# target_parts = [all_targets[part * length : (part + 1) * length] for part in range(split_parts)]
-# stacked_targets = np.vstack((target_parts[0], target_parts[1], target_parts[2], target_parts[3]))
-# # print(stacked_targets.shape)
-
 # initialize weight
-# W = np.random.random((8 + 1, 1))
 
-# W = np.ones((PCA_k + 1, 1))
-# W = np.random.random((PCA_k + 1, 1))
-# W = np.random.randint(-5, 5, size=[PCA_k + 1,1])
-# W = W / 10
-# np.save("Weight8.npy", W)
+read_file = 1
 
-W = np.load("Weight8.npy")
+if read_file:
+    W = np.load("Weight{}.npy".format(PCA_k))
+else:
+    W = np.random.randint(-5, 5, size=[PCA_k + 1,1])
+    W = W / 10
+    np.save("Weight{}.npy".format(PCA_k), W)
+
 
 # parameters
-learning_rate = 0.0000004
-num_epoch = 1000
-W1 = Training(W, biased_reduced_all_features, all_targets, learning_rate, num_epoch)
-print(np.dot(biased_reduced_all_features[-4, :], W1))
-print(Criterion(W1, biased_reduced_all_features, all_targets))
-np.save("Weight8_8.npy", W1)
-# num_epoch = 10000
-# start = 0.0000004
-# end = 0.0000005
-# pace = (end - start) / 10
+learning_rate = 0.000078
+num_epoch = 100000
+# W1 = Training(W, biased_reduced_all_features[ : -50, :], all_targets[ : -50], learning_rate, num_epoch)
+# print(np.dot(biased_reduced_all_features[-1, :], W1))
+# print(Criterion(W1, biased_reduced_all_features[-50 : , :], all_targets[-50 :]))
+# np.save("Weight{}_{}.npy".format(PCA_k, PCA_k), W1)
 
+W1 = np.load("Weight{}_{}.npy".format(PCA_k, PCA_k))
+Evaluating(W1, biased_reduced_all_features[-50 : , :], all_targets[-50 :])
+# print(np.dot(biased_reduced_all_features[-4, :], W1))
+# print(np.dot(biased_reduced_all_features[-5, :], W1))
+# print(np.dot(biased_reduced_all_features[-6, :], W1))
+
+# num_epoch = 10000
+# start = 0.00006
+# end = 0.00008
+# pace = (end - start) / 10
 # for mul in range(10):
 #     alpha = start + mul * pace
 #     W1 = Training(W, biased_reduced_all_features, all_targets, alpha, num_epoch)
-
 #     error = Criterion(W1, biased_reduced_all_features, all_targets)
 #     print('alpha: ', alpha, error)
 #     print(np.dot(biased_reduced_all_features[-1, :], W1))
